@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bdrep"
+version = "0.1.0"
+description = "Daily lead digest for Mata Engineering: ingest, score, draft, digest. Nothing is sent automatically."
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+llm = ["anthropic>=1.13"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+bdrep = "bdrep.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["bdrep*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
