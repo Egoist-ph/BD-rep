@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SYNTHETIC test data shaped like a Google News RSS search feed. Not real articles. -->
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>"arc flash" - Google News</title>
+    <link>https://news.google.com/</link>
+    <item>
+      <title>Arc Flash Protection Market to Reach $3.1 Billion by 2032, Growing at 6% CAGR - Example Wire</title>
+      <link>https://news.google.com/rss/articles/test-market</link>
+      <guid isPermaLink="false">test-market</guid>
+      <pubDate>Fri, 09 Oct 2026 12:00:00 GMT</pubDate>
+      <description>&lt;a href="https://example.com/market"&gt;Arc Flash Protection Market report&lt;/a&gt; Example Wire</description>
+      <source url="https://example.com">Example Wire</source>
+    </item>
+    <item>
+      <title>Chicago warehouse fire blamed on electrical failure; insurer hires investigators - Example Tribune</title>
+      <link>https://news.google.com/rss/articles/test-fire</link>
+      <guid isPermaLink="false">test-fire</guid>
+      <pubDate>Fri, 09 Oct 2026 15:30:00 GMT</pubDate>
+      <description>A 200,000 square feet warehouse fire was traced to an electrical failure in the main switchboard; a fire investigation is under way. Example Tribune</description>
+      <source url="https://example.com">Example Tribune</source>
+    </item>
+    <item>
+      <title>Sacramento hospital approves $120 million expansion with new substation and switchgear - Example Bee</title>
+      <link>https://news.google.com/rss/articles/test-hospital</link>
+      <guid isPermaLink="false">test-hospital</guid>
+      <pubDate>Thu, 08 Oct 2026 09:00:00 GMT</pubDate>
+      <description>The board approved the expansion; construction is expected to start next year. Example Bee</description>
+      <source url="https://example.com">Example Bee</source>
+    </item>
+    <item>
+      <title>Texas data center campus breaks ground with 300 MW of capacity - Example News</title>
+      <link>https://news.google.com/rss/articles/test-texas</link>
+      <guid isPermaLink="false">test-texas</guid>
+      <pubDate>Fri, 09 Oct 2026 10:00:00 GMT</pubDate>
+      <description>The arc flash and coordination study will be performed by the design team. Example News</description>
+      <source url="https://example.com">Example News</source>
+    </item>
+    <item>
+      <title>Tampa school district seeks bids for arc flash study at 12 campuses - Example Times</title>
+      <link>https://news.google.com/rss/articles/test-tampa</link>
+      <guid isPermaLink="false">test-tampa</guid>
+      <pubDate>Fri, 09 Oct 2026 08:00:00 GMT</pubDate>
+      <description>The district issued an RFQ for arc flash and short circuit studies. Example Times</description>
+      <source url="https://example.com">Example Times</source>
+    </item>
+    <item>
+      <title>Fremont civic center LED retrofit under construction since May may qualify for 179D deduction - Example Patch</title>
+      <link>https://news.google.com/rss/articles/test-179d</link>
+      <guid isPermaLink="false">test-179d</guid>
+      <pubDate>Fri, 09 Oct 2026 11:00:00 GMT</pubDate>
+      <description>The city's lighting retrofit of the civic center building began construction in May. Example Patch</description>
+      <source url="https://example.com">Example Patch</source>
+    </item>
+    <item>
+      <title>Arc Flash Hazard Analysis and Short Circuit Study, Building 22 - Example Bid Board</title>
+      <link>https://news.google.com/rss/articles/test-dup</link>
+      <guid isPermaLink="false">test-dup</guid>
+      <pubDate>Fri, 09 Oct 2026 07:00:00 GMT</pubDate>
+      <description>San Diego, CA: federal solicitation for an arc flash study. Example Bid Board</description>
+      <source url="https://example.com">Example Bid Board</source>
+    </item>
+    <item>
+      <title>Old story from last month about arc flash - Example Archive</title>
+      <link>https://news.google.com/rss/articles/test-old</link>
+      <guid isPermaLink="false">test-old</guid>
+      <pubDate>Mon, 07 Sep 2026 07:00:00 GMT</pubDate>
+      <description>Old. Example Archive</description>
+      <source url="https://example.com">Example Archive</source>
+    </item>
+  </channel>
+</rss>

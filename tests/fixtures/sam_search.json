@@ -1,0 +1,123 @@
+{
+  "_comment": "SYNTHETIC test data shaped like a SAM.gov Opportunities v2 search response. Not real notices.",
+  "totalRecords": 9,
+  "limit": 1000,
+  "offset": 0,
+  "opportunitiesData": [
+    {
+      "noticeId": "test-0001",
+      "title": "J065--Arc Flash Hazard Analysis and Short Circuit Study, Building 22",
+      "solicitationNumber": "TEST-26-Q-0001",
+      "fullParentPathName": "EXAMPLE AGENCY.EXAMPLE REGIONAL OFFICE",
+      "postedDate": "2026-10-08",
+      "type": "Combined Synopsis/Solicitation",
+      "baseType": "Combined Synopsis/Solicitation",
+      "typeOfSetAsideDescription": "Total Small Business Set-Aside (FAR 19.5)",
+      "responseDeadLine": "2026-10-24T14:00:00-07:00",
+      "naicsCode": "541330",
+      "classificationCode": "J065",
+      "active": "Yes",
+      "pointOfContact": [
+        {"type": "primary", "fullName": "Pat Example", "email": "pat.example@example.com", "phone": "555-0100", "title": "Contracting Officer"}
+      ],
+      "description": "https://api.sam.gov/prod/opportunities/v1/noticedesc?noticeid=test-0001",
+      "officeAddress": {"zipcode": "92101", "city": "San Diego", "countryCode": "USA", "state": "CA"},
+      "placeOfPerformance": {"city": {"code": "66000", "name": "San Diego"}, "state": {"code": "CA", "name": "California"}, "zip": "92101", "country": {"code": "USA", "name": "UNITED STATES"}},
+      "uiLink": "https://sam.gov/opp/test-0001/view"
+    },
+    {
+      "noticeId": "test-0002",
+      "title": "8415--Arc Flash Suits and PPE Kits",
+      "postedDate": "2026-10-08",
+      "type": "Solicitation",
+      "naicsCode": "315990",
+      "active": "Yes",
+      "pointOfContact": [],
+      "description": "https://api.sam.gov/prod/opportunities/v1/noticedesc?noticeid=test-0002",
+      "placeOfPerformance": {"city": {"name": "Rockford"}, "state": {"code": "IL"}},
+      "uiLink": "https://sam.gov/opp/test-0002/view"
+    },
+    {
+      "noticeId": "test-0003",
+      "title": "Arc Flash Study and Protective Device Coordination, Outpatient Clinic",
+      "postedDate": "10/07/2026",
+      "type": "Combined Synopsis/Solicitation",
+      "naicsCode": "541330",
+      "active": "Yes",
+      "responseDeadLine": "2026-10-30T12:00:00-04:00",
+      "pointOfContact": [{"type": "primary", "fullName": "Sam Sample", "email": "sam.sample@example.com"}],
+      "description": "https://api.sam.gov/prod/opportunities/v1/noticedesc?noticeid=test-0003",
+      "placeOfPerformance": {"city": {"name": "Orlando"}, "state": {"code": "FL"}},
+      "uiLink": "https://sam.gov/opp/test-0003/view"
+    },
+    {
+      "noticeId": "test-0004",
+      "title": "Z1DA--Replace Main Switchgear, Building 1500",
+      "postedDate": "2026-10-08",
+      "type": "Solicitation",
+      "naicsCode": "238210",
+      "active": "Yes",
+      "pointOfContact": [{"type": "primary", "fullName": "Lee Placeholder", "email": "lee.placeholder@example.com"}],
+      "description": "https://api.sam.gov/prod/opportunities/v1/noticedesc?noticeid=test-0004",
+      "placeOfPerformance": {"city": {"name": "Fresno"}, "state": {"code": "CA"}},
+      "uiLink": "https://sam.gov/opp/test-0004/view"
+    },
+    {
+      "noticeId": "test-0005",
+      "title": "S201--Janitorial Services, Administrative Building",
+      "postedDate": "2026-10-08",
+      "type": "Combined Synopsis/Solicitation",
+      "naicsCode": "561720",
+      "active": "Yes",
+      "description": "https://api.sam.gov/prod/opportunities/v1/noticedesc?noticeid=test-0005",
+      "placeOfPerformance": {"city": {"name": "Sacramento"}, "state": {"code": "CA"}},
+      "uiLink": "https://sam.gov/opp/test-0005/view"
+    },
+    {
+      "noticeId": "test-0006",
+      "title": "Electrical Forensic Failure Analysis and Expert Witness Support",
+      "postedDate": "2026-10-09",
+      "type": "Sources Sought",
+      "naicsCode": "541330",
+      "active": "Yes",
+      "responseDeadLine": "2026-10-20T17:00:00-05:00",
+      "pointOfContact": [{"type": "primary", "fullName": "Jordan Testcase", "email": "jordan.testcase@example.com"}],
+      "description": "https://api.sam.gov/prod/opportunities/v1/noticedesc?noticeid=test-0006",
+      "placeOfPerformance": {"city": {"name": "Chicago"}, "state": {"code": "IL"}},
+      "uiLink": "https://sam.gov/opp/test-0006/view"
+    },
+    {
+      "noticeId": "test-0007",
+      "title": "Electrical Distribution Upgrade including Coordination Study, Building 7",
+      "postedDate": "2026-10-09",
+      "type": "Award Notice",
+      "naicsCode": "238210",
+      "active": "Yes",
+      "award": {"amount": "1250000", "date": "2026-10-01", "awardee": {"name": "Example Electric Inc."}},
+      "pointOfContact": [{"type": "primary", "fullName": "Casey Mock", "email": "casey.mock@example.com"}],
+      "description": "https://api.sam.gov/prod/opportunities/v1/noticedesc?noticeid=test-0007",
+      "placeOfPerformance": {"city": {"name": "Oakland"}, "state": {"code": "CA"}},
+      "uiLink": "https://sam.gov/opp/test-0007/view"
+    },
+    {
+      "noticeId": "test-0008",
+      "title": "Arc Flash Study, Archived Notice",
+      "postedDate": "2026-10-08",
+      "type": "Solicitation",
+      "active": "No",
+      "placeOfPerformance": {"state": {"code": "IL"}},
+      "uiLink": "https://sam.gov/opp/test-0008/view"
+    },
+    {
+      "noticeId": "test-0009",
+      "title": "Arc Flash Study, Distribution Center",
+      "postedDate": "2026-10-08",
+      "type": "Solicitation",
+      "naicsCode": "541330",
+      "active": "Yes",
+      "placeOfPerformance": null,
+      "officeAddress": {"city": "Dallas", "state": "TX"},
+      "uiLink": "https://sam.gov/opp/test-0009/view"
+    }
+  ]
+}

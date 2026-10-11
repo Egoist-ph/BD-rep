@@ -1,0 +1,13 @@
+# Lead data and digests contain prospect details and unsent outreach drafts.
+# This repo is public: never commit them here.
+data/
+digests/
+state/
+*.db
+*.db-journal
+
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.venv/
+.env
