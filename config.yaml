@@ -291,7 +291,9 @@ scoring:
 
 sources:
   sam_gov:
-    enabled: true
+    # Off until a SAM.gov API key is set up. To turn on: set this to true and
+    # export SAM_API_KEY (SAM.gov > Profile > Account Details > Public API Key).
+    enabled: false
     api_key_env: SAM_API_KEY
     # One search request per state per run (plus pagination). A personal key
     # with no SAM.gov role is limited to 10 requests/day; raise this only if

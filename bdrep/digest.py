@@ -207,8 +207,10 @@ def build_digest(store: Store, cfg: Config, today: dt.date) -> tuple[str, int]:
         out.append(f"| {SOURCE_LABELS.get(r['source'], r['source'])} | {status} | {r['fetched']} | {r['new']} | "
                    f"{r['merged']} | {r['requests']} | {_cell(r['note'])} |")
     for name, opts in cfg.get("sources", {}).items():
-        if name not in ran and opts.get("enabled", True):
-            out.append(f"| {SOURCE_LABELS.get(name, name)} | NOT RUN TODAY | | | | | |")
+        if name in ran:
+            continue
+        status = "NOT RUN TODAY" if opts.get("enabled", True) else "off (disabled in config.yaml)"
+        out.append(f"| {SOURCE_LABELS.get(name, name)} | {status} | | | | | |")
     out.append("")
 
     stats = weekly_stats(store, today)

@@ -8,6 +8,7 @@
   mark      record what you did with a lead (feeds the weekly precision number)
   show      print one lead with its score breakdown and draft
   stats     weekly scorecard against the MVP success metric
+  search    live-test the Google News queries (stores nothing)
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ from bdrep.config import load_config
 from bdrep.digest import weekly_stats, write_digest
 from bdrep.drafting import run_drafts
 from bdrep.pipeline import ingest, open_store, score_all
+from bdrep.search_check import format_report, run_search
 from bdrep.store import REVIEW_STATUSES, row_to_dict
 
 
@@ -72,10 +74,21 @@ def main(argv: list[str] | None = None) -> int:
     p_stats = sub.add_parser("stats", help="weekly scorecard")
     p_stats.add_argument("--days", type=int, default=7)
 
+    p_search = sub.add_parser("search", help="live-test the Google News queries; stores nothing")
+    p_search.add_argument("--query", action="append", help="test this query instead of the configured ones (repeatable)")
+    p_search.add_argument("--days", type=int, default=7, help="how far back Google News should look (default 7)")
+    p_search.add_argument("--limit", type=int, default=15, help="results shown per query (default 15)")
+    p_search.add_argument("--kept-only", action="store_true", help="hide low-scoring and excluded results")
+
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
 
     cfg = load_config(args.config)
+    if args.command == "search":
+        reports = run_search(cfg, queries=args.query, days=args.days)
+        print(format_report(reports, limit=args.limit, kept_only=args.kept_only))
+        return 1 if all(r.error for r in reports) else 0
+
     today = dt.date.fromisoformat(args.date) if args.date else cfg.today()
     store = open_store(cfg, args.db)
     try:

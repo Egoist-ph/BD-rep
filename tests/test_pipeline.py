@@ -29,6 +29,7 @@ class StaticSource:
 
 
 def sources(cfg, sam_payload, news_xml):
+    cfg.data["sources"]["sam_gov"]["enabled"] = True  # off by default in config.yaml
     return {
         "sam_gov": StaticSource("sam_gov", parse_search(sam_payload, list(cfg.states))),
         "news_rss": StaticSource("news_rss", parse_feed(news_xml, list(cfg.states))),
@@ -129,6 +130,7 @@ def test_descriptions_are_not_refetched_on_overlapping_days(store, cfg, sam_payl
     from conftest import FakeResponse, FakeSession
 
     monkeypatch.setenv("SAM_API_KEY", "k")
+    cfg.data["sources"]["sam_gov"]["enabled"] = True
     cfg.data["states"] = {"CA": cfg.states["CA"]}
     desc = FakeResponse(200, {"description": "Includes an arc flash study."})
 
@@ -143,3 +145,14 @@ def test_descriptions_are_not_refetched_on_overlapping_days(store, cfg, sam_payl
     assert described >= 1
     second = day(TODAY + dt.timedelta(days=1), [FakeResponse(200, sam_payload)])
     assert [c for c in second.calls if "noticedesc" in c["url"]] == []
+
+
+def test_sam_off_by_default_shows_in_digest(store, cfg, news_xml, tmp_path):
+    assert cfg.source("sam_gov")["enabled"] is False
+    news = StaticSource("news_rss", parse_feed(news_xml, list(cfg.states)))
+    reports = ingest(store, cfg, TODAY, sources={"news_rss": news})
+    assert [(r.name, r.status) for r in reports] == [("sam_gov", "skipped"), ("news_rss", "ok")]
+    score_all(store, cfg)
+    text = write_digest(store, cfg, TODAY, tmp_path).read_text()
+    assert "| SAM.gov | off (disabled in config.yaml) |" in text
+    assert "| News | ok |" in text

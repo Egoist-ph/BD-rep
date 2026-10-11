@@ -18,11 +18,25 @@ Out of scope for this MVP: LinkedIn scraping, contractor association directories
 
 ```bash
 pip install -e ".[llm,dev]"          # Python 3.11+
-export SAM_API_KEY=...                # SAM.gov > Profile > Account Details > Public API Key
 export ANTHROPIC_API_KEY=...          # optional: without it, drafts come from templates
+python -m bdrep search                # live-test the Google News queries first (stores nothing)
 python -m bdrep run                   # ingest + score + draft + digest
 open digests/$(date +%F).md
 ```
+
+SAM.gov is **off by default**. To turn it on, set `sources.sam_gov.enabled: true` in `config.yaml` and export `SAM_API_KEY` (SAM.gov > Profile > Account Details > Public API Key). Until then, the digest's Source health table lists it as "off".
+
+### Test the Google search
+
+`search` runs the queries live, scores every result, and prints what each query returned and why each result was kept or dropped. It writes nothing to the database and drafts nothing.
+
+```bash
+python -m bdrep search                                  # all configured queries, last 7 days
+python -m bdrep search --kept-only                      # only qualified / held / near-miss results
+python -m bdrep search --query '"arc flash" Chicago' --days 30 --limit 50   # try a query before adding it
+```
+
+Each query prints its Google News URL, so you can open it in a browser and compare against what the tool saw. The summary at the end gives, per query, how many results landed in each verdict. A query that returns mostly `excluded` and `low` is costing you noise. Rewrite it or drop it in `config.yaml` under `sources.news_rss.google_news_queries`.
 
 After you act on a lead, record it. The weekly precision number is computed from these marks, and without them it has nothing to measure:
 
@@ -32,14 +46,14 @@ python -m bdrep stats                 # last 7 days against the success metric
 python -m bdrep show 12               # one lead with its score breakdown and draft
 ```
 
-Other commands: `ingest`, `score [--rescore]`, `draft [--no-llm]`, `digest`. Global flags: `--config`, `--db`, `--date YYYY-MM-DD`.
+Other commands: `search`, `ingest`, `score [--rescore]`, `draft [--no-llm]`, `digest`. Global flags: `--config`, `--db`, `--date YYYY-MM-DD`.
 
 ### Run it daily
 
 On a personal machine (not an employer laptop), for example with cron at 6:10 am:
 
 ```
-10 6 * * * cd ~/BD-rep && SAM_API_KEY=... ANTHROPIC_API_KEY=... .venv/bin/python -m bdrep run >> data/run.log 2>&1
+10 6 * * * cd ~/BD-rep && ANTHROPIC_API_KEY=... .venv/bin/python -m bdrep run >> data/run.log 2>&1
 ```
 
 Running it twice in a day is safe. The second run adds only the new leads to the same digest file and counts SAM.gov requests already spent that day.
@@ -50,7 +64,7 @@ Running it twice in a day is safe. The second run adds only the new leads to the
 
 | Source | What it pulls | Cost per run | Watch out for |
 |---|---|---|---|
-| `sam_gov` | Active federal notices with place of performance in CA, IL, FL (SAM.gov Get Opportunities v2) | 1 request per state + pagination, plus up to `description_budget` description fetches | A personal key with no SAM.gov role is limited to **10 requests/day**, enforced by `daily_request_budget`. **Keys expire every 90 days.** An expired key shows up as an error in the digest's Source health table. |
+| `sam_gov` (off by default) | Active federal notices with place of performance in CA, IL, FL (SAM.gov Get Opportunities v2) | 1 request per state + pagination, plus up to `description_budget` description fetches | A personal key with no SAM.gov role is limited to **10 requests/day**, enforced by `daily_request_budget`. **Keys expire every 90 days.** An expired key shows up as an error in the digest's Source health table. |
 | `news_rss` | Google News RSS search results for the queries in `config.yaml`, plus any RSS/Atom feeds you add | 1 request per query | Noisy by nature. Scoring and the Claude review exist mainly to filter this source. |
 
 Adding a source takes one adapter in `bdrep/sources/` that returns `Lead` objects, plus one registry entry.
@@ -114,6 +128,7 @@ bdrep/store.py           SQLite store + dedupe (exact key, then fuzzy title with
 bdrep/scoring.py         rule-based score and verdict
 bdrep/drafting.py        Claude review + draft, template fallback
 bdrep/digest.py          markdown digest, source health, weekly scorecard
+bdrep/search_check.py    `search` command: live query test, nothing stored
 bdrep/cli.py             python -m bdrep ...
 tests/                   pytest, no network; fixtures are synthetic
 ```
