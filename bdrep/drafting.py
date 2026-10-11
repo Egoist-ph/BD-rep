@@ -121,6 +121,22 @@ SUBJECT_PREFIX = {
     "179d": "179D certification",
 }
 
+# Segment pitches (config: scoring.segments.<name>.template).
+SEGMENT_TEMPLATES = {
+    "study_review": {
+        "service": (
+            "Many plants keep their arc flash study in-house. That works until the inputs drift: "
+            "the utility's available fault current changes, breakers or settings get swapped, or "
+            "equipment is added. I offer an independent review of an existing study (system data, "
+            "the IEEE 1584 calculation method, protective device settings, and labels) with a short "
+            "written list of anything to fix."
+        ),
+        "ask": "Would a 15-minute call be useful to see whether a review makes sense for your facility?",
+        "subject": "Arc flash study review",
+        "recipient": "Plant or maintenance manager, or EHS lead, at the facility",
+    },
+}
+
 NEWS_RECIPIENT = {
     "forensics": "Property owner, insurer, or counsel handling the loss (find via the article)",
     "179d": "Building owner (private) or the project's designer (public building), per the article",
@@ -150,6 +166,11 @@ def template_why(lead: Lead, score: dict[str, Any]) -> str:
     return "; ".join(b for b in bits if b) + "."
 
 
+def _segment_template(score: dict[str, Any], cfg: Config) -> dict[str, str] | None:
+    seg = (cfg.scoring.get("segments") or {}).get(score.get("segment") or "", {})
+    return SEGMENT_TEMPLATES.get(seg.get("template", ""))
+
+
 def template_draft(lead: Lead, score: dict[str, Any], cfg: Config) -> Draft:
     line = score.get("service_line") or "arc_flash"
     owner = cfg.get("owner", {})
@@ -158,8 +179,18 @@ def template_draft(lead: Lead, score: dict[str, Any], cfg: Config) -> Draft:
     to_contractor = bool(lead.extra.get("awardee")) or _is_construction(lead)
     title_terms = match_terms(norm_text(lead.title), score.get("strong_terms") or [])
     service = (SERVICE_DIRECT if title_terms else SERVICE_IMPLIED).get(line, "")
+    seg_tpl = _segment_template(score, cfg)
+    if seg_tpl:
+        service = seg_tpl["service"]
 
-    if lead.notice_type == "Sources Sought":
+    # Never quote a headline about an injury, death or citation back to the
+    # company: open straight with the offer instead.
+    sensitive = bool(score.get("sensitive"))
+    opener = "" if sensitive else f"I came across {ref} {lead.title}{f' ({loc})' if loc else ''}."
+
+    if seg_tpl:
+        ask = seg_tpl["ask"]
+    elif lead.notice_type == "Sources Sought":
         ask = "I would like to respond to the sources-sought notice. Could you confirm the best way to submit a capability statement?"
     elif to_contractor and line == "arc_flash":
         ask = "If you are carrying the study scope, I would be glad to quote it as your sub. Open to a 15-minute call this week?"
@@ -174,16 +205,18 @@ def template_draft(lead: Lead, score: dict[str, Any], cfg: Config) -> Draft:
     states = "/".join(_licensed_states(cfg))
     body = "\n\n".join([
         greeting,
-        f"I came across {ref} {lead.title}{f' ({loc})' if loc else ''}. {service}".strip(),
+        f"{opener} {service}".strip(),
         f"I am a licensed electrical PE ({states}) and run {owner.get('firm', 'my firm')}, "
         f"a small consultancy focused on {SERVICE_FOCUS.get(line, 'electrical studies')}. {ask}",
         (owner.get("signature") or owner.get("name", "")).strip(),
     ])
+    subject_prefix = seg_tpl["subject"] if seg_tpl else SUBJECT_PREFIX.get(line, "Electrical engineering support")
+    subject = f"{subject_prefix} for your facility" if sensitive else f"{subject_prefix}: {_truncate(lead.title, 70)}"
     return Draft(
         keep=True,
         why=template_why(lead, score),
-        recipient=template_recipient(lead, line),
-        subject=f"{SUBJECT_PREFIX.get(line, 'Electrical engineering support')}: {_truncate(lead.title, 70)}",
+        recipient=seg_tpl["recipient"] if seg_tpl and not to_contractor else template_recipient(lead, line),
+        subject=subject,
         body=body,
     )
 
@@ -216,6 +249,9 @@ Email rules:
 - On a construction solicitation or award, the buyer of a study is usually the electrical contractor bidding or awarded the job, not the contracting officer. Address the email to them.
 - On a federal sources-sought notice, the ask is how to submit a capability statement.
 - Never claim past clients, project counts, results, certifications, or credentials beyond those stated here. Never state project facts that are not in the lead data.
+- If the pre-screen names a segment, follow that segment's pitch.
+- If the lead involves an injury, death, incident, or regulatory citation, do not mention it, the people involved, or anyone's fault, and do not quote the headline. Open with the service itself. For forensics, address only an insurer or counsel handling the matter.
+- Never imply existing clients in a state or industry (avoid "I work with plants like yours").
 - Sign off exactly as:
 {(owner.get('signature') or owner.get('name', '')).strip()}
 
@@ -239,11 +275,15 @@ def _lead_payload(lead: Lead, score: dict[str, Any], cfg: Config) -> str:
         "description": lead.description[:6000],
     }
     state_note = cfg.states.get(lead.state or "", {}).get("note", "")
+    seg = (cfg.scoring.get("segments") or {}).get(score.get("segment") or "", {})
     match = {
         "service_line": score.get("service_label"),
         "matched_terms": score.get("strong_terms", []) + score.get("weak_terms", []),
         "state_license": score.get("license"),
         "state_note": state_note,
+        "segment": seg.get("label", ""),
+        "segment_pitch": " ".join((seg.get("pitch") or "").split()),
+        "incident_terms": score.get("sensitive", []),
     }
     return (
         f"<lead>\n{json.dumps(data, indent=2)}\n</lead>\n\n"

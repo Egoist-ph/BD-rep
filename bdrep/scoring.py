@@ -7,6 +7,7 @@ Total is 0-100:
     service (0-50)  strongest service line; weak-only matches cap at 25
     state   (0-20)  licensed state 20, license pending 10, not detected 5
     project (0-30)  notice type, procurement/stage/facility words, quantities
+    segment bonus   lead belongs to a target segment (config: scoring.segments)
     minus penalties (scope Roben does not sell; noise words)
 
 Verdicts:
@@ -49,6 +50,10 @@ class ScoreResult:
     project_signals: list[str] = field(default_factory=list)
     license: str = "unknown"
     reasons: list[str] = field(default_factory=list)
+    segment: str | None = None
+    segment_label: str = ""
+    segment_bonus: int = 0
+    sensitive: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -58,12 +63,31 @@ def _haystack(lead: Lead) -> str:
     return norm_text(f"{lead.title} {lead.description}")
 
 
-def _service(text: str, lead: Lead, sc: dict[str, Any]) -> tuple[int, str | None, list[str], list[str]]:
+def _segment(text: str, lead: Lead, sc: dict[str, Any]) -> tuple[str | None, dict[str, Any]]:
+    """First segment whose states include the lead's and whose facility terms match."""
+    for key, seg in (sc.get("segments") or {}).items():
+        if lead.state in seg.get("states", []) and match_terms(text, seg.get("facility_terms", [])):
+            return key, seg
+    return None, {}
+
+
+def _excluded(text: str, lead: Lead, sc: dict[str, Any]) -> list[str]:
+    hits = match_terms(text, sc.get("exclude", []))
+    if lead.notice_type not in ("", "News"):
+        hits += match_terms(text, sc.get("exclude_procurement", []))
+    return sorted(set(hits))
+
+
+def _service(
+    text: str, lead: Lead, sc: dict[str, Any], seg: dict[str, Any] | None = None
+) -> tuple[int, str | None, list[str], list[str]]:
     best: tuple[int, str | None, list[str], list[str]] = (0, None, [], [])
     cap = int(sc.get("service_max", 50))
+    seg = seg or {}
     for key, line in sc["service_lines"].items():
-        strong = match_terms(text, line.get("strong", []))
-        weak = match_terms(text, line.get("weak", []))
+        in_seg = seg.get("service_line") == key
+        strong = match_terms(text, line.get("strong", []) + (seg.get("strong_terms", []) if in_seg else []))
+        weak = match_terms(text, line.get("weak", []) + (seg.get("weak_terms", []) if in_seg else []))
         if strong:
             points = 35 + 5 * (len(strong) - 1) + 3 * len(weak)
         else:
@@ -108,15 +132,18 @@ def score_lead(lead: Lead, cfg: Config) -> ScoreResult:
     text = _haystack(lead)
     license_status = cfg.license_status(lead.state)
 
-    excluded = match_terms(text, sc.get("exclude", []))
+    excluded = _excluded(text, lead, sc)
     if excluded:
         return ScoreResult(0, "excluded", license=license_status, reasons=[f"excluded: {', '.join(excluded)}"])
     if license_status == "out_of_area":
         return ScoreResult(0, "excluded", license=license_status, reasons=[f"out of area: {lead.state}"])
 
-    service, line, strong, weak = _service(text, lead, sc)
+    segment, seg = _segment(text, lead, sc)
+    service, line, strong, weak = _service(text, lead, sc, seg)
     state = int(sc.get("state_points", {}).get(license_status, 0))
     project, signals = _project(text, lead, sc)
+    bonus = int(seg.get("bonus", 0)) if segment and line == seg.get("service_line") else 0
+    sensitive = match_terms(text, sc.get("sensitive_terms", []))
 
     reasons: list[str] = []
     penalty = 0
@@ -132,7 +159,7 @@ def score_lead(lead: Lead, cfg: Config) -> ScoreResult:
         penalty += int(line_pen.get("points", 15))
         reasons.append(f"{line_pen.get('reason', 'service caution')}: {', '.join(line_hits)}")
 
-    total = max(0, min(100, service + state + project - penalty))
+    total = max(0, min(100, service + state + project + bonus - penalty))
     threshold = int(sc.get("threshold", 60))
     margin = int(sc.get("near_miss_margin", 15))
 
@@ -157,6 +184,8 @@ def score_lead(lead: Lead, cfg: Config) -> ScoreResult:
         penalty=penalty, service_line=line, service_label=line_cfg.get("label", ""),
         strong_terms=strong, weak_terms=weak, project_signals=signals,
         license=license_status, reasons=reasons,
+        segment=segment, segment_label=seg.get("label", "") if segment else "",
+        segment_bonus=bonus, sensitive=sensitive,
     )
 
 
@@ -164,9 +193,6 @@ def has_service_signal(lead: Lead, cfg: Config) -> bool:
     """Cheap pre-check used to decide whether to spend a request on details."""
     sc = cfg.scoring
     text = _haystack(lead)
-    if match_terms(text, sc.get("exclude", [])) or cfg.license_status(lead.state) == "out_of_area":
+    if _excluded(text, lead, sc) or cfg.license_status(lead.state) == "out_of_area":
         return False
-    return any(
-        match_terms(text, line.get("strong", []) + line.get("weak", []))
-        for line in sc["service_lines"].values()
-    )
+    return _service(text, lead, sc, _segment(text, lead, sc)[1])[1] is not None

@@ -93,6 +93,23 @@ Hard excludes score 0: PPE and arc-flash-suit purchases, NFPA 70E training, mark
 
 After editing the config, run `python -m bdrep score --rescore` to re-score leads not yet in a digest. `python examples/make_sample_digest.py` re-runs the synthetic fixtures, so you can see what a change moves. A sample output is at [`examples/sample-digest.md`](examples/sample-digest.md).
 
+## Segments
+
+A segment is a group of prospects with its own pitch, configured under `scoring.segments` in `config.yaml`. It has one entry so far.
+
+**Illinois manufacturers (`il_manufacturing`).** These are plants that may run their arc flash study in-house. A lead joins the segment when it is in Illinois and mentions a manufacturing facility (manufacturer, plant, factory, foundry, machining, …). Inside the segment:
+
+- **Extra evidence:** "electrical hazards" and similar OSHA wording count as direct arc flash evidence. Expansions, new production lines and OSHA mentions count as weak evidence, so they show up as near misses rather than getting drafts.
+- **Bonus:** the lead gets +10 points.
+- **Pitch:** an independent review of the existing study: system data, IEEE 1584 method, protective device settings and labels, with a written fix list. Drafts never say or imply that the plant's staff are unqualified or that an in-house study is improper.
+- **Size:** a headline doesn't tell you whether a company is small, so the digest asks you to check before sending.
+
+Three Google News queries feed it: OSHA electrical citations at Illinois plants, "arc flash" at Illinois plants, and Illinois plant expansions.
+
+**Incident and enforcement wording** (injured, burned, killed, cited, fined, …) gets a "Handle with care" note in the digest. The draft then never quotes the headline or mentions the incident, citation or people involved; it opens with the offer instead.
+
+**Exclusions** are split. PPE, gloves and training are excluded on procurement notices, where someone is buying them, but not in news, where "cited for failing to provide PPE" is a lead.
+
 ## Drafting
 
 When `ANTHROPIC_API_KEY` is set, each qualified lead goes to Claude (`claude-opus-5-5`, effort `medium`, structured JSON output). Claude returns:

@@ -56,7 +56,10 @@ PLACE_ALIASES = {
     "IL": [
         "chicago", "peoria", "rockford", "naperville", "joliet", "elgin",
         "champaign", "evanston", "schaumburg", "des plaines", "waukegan",
-        "cook county", "dupage county", "ohare",
+        "cook county", "dupage county", "ohare", "moline", "rock island",
+        "kankakee", "bolingbrook", "elk grove village", "arlington heights",
+        "carol stream", "belvidere", "galesburg", "effingham", "mattoon",
+        "mchenry county", "kane county", "will county",
     ],
     "FL": [
         "miami", "orlando", "tampa", "jacksonville", "tallahassee",

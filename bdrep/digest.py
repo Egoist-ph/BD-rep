@@ -57,6 +57,7 @@ def _lead_block(n: int, row: sqlite3.Row, cfg: Config, *, with_draft: bool) -> l
     out.append(
         f"Score **{row['score']}** (service {score.get('service', 0)} · state {score.get('state', 0)} "
         f"· project {score.get('project', 0)}"
+        + (f" · segment +{score['segment_bonus']}" if score.get("segment_bonus") else "")
         + (f" · penalty -{score['penalty']}" if score.get("penalty") else "")
         + f") · lead #{row['id']}"
     )
@@ -64,6 +65,13 @@ def _lead_block(n: int, row: sqlite3.Row, cfg: Config, *, with_draft: bool) -> l
     if row["why"]:
         out.append(f"- **Why it matters:** {row['why']}")
     terms = score.get("strong_terms", []) + score.get("weak_terms", [])
+    if score.get("segment_label"):
+        out.append(f"- **Segment:** {score['segment_label']} — check the company is small before sending")
+    if score.get("sensitive"):
+        out.append(
+            f"- **Handle with care:** incident or enforcement wording ({', '.join(score['sensitive'])}). "
+            "The draft doesn't mention it. Decide whether outreach is appropriate now."
+        )
     if score.get("service_label"):
         out.append(f"- **Service:** {score['service_label']}" + (f" — matched {', '.join(terms)}" if terms else ""))
     source_bits = [_sources(row)]

@@ -176,22 +176,17 @@ scoring:
   # patterns for these keywords: PPE purchases, training, market-research
   # press releases, job ads, single-family residential.
   exclude:
-    - ppe
     - arc flash suit
     - arc flash suits
     - arc flash clothing
     - arc flash kit
     - arc flash kits
-    - flame resistant
     - fr clothing
-    - gloves
     - apparel
     - arc flash training
     - nfpa 70e training
-    - electrical safety training
     - training course
     - training courses
-    - training services
     - webinar
     - certification class
     - market size
@@ -206,6 +201,94 @@ scoring:
     - homeowner
     - homeowners
     - obituary
+
+  # Excluded only on procurement notices (SAM.gov), where they mean someone is
+  # buying PPE or training. In news ("OSHA cited the plant for failing to
+  # provide PPE") the same words are a lead, not noise.
+  exclude_procurement:
+    - ppe
+    - gloves
+    - flame resistant
+    - electrical safety training
+    - training services
+
+  # Incident or enforcement wording. Matching leads are flagged in the digest,
+  # and drafts never quote the headline or mention the incident, citation or
+  # people involved. Nobody wants their OSHA citation read back to them.
+  sensitive_terms:
+    - cited
+    - cites
+    - citation
+    - citations
+    - violations
+    - fined
+    - penalties
+    - killed
+    - fatal
+    - fatality
+    - fatally
+    - died
+    - death
+    - injured
+    - injury
+    - injuries
+    - burned
+    - hospitalized
+    - electrocuted
+    - electrocution
+
+  # Target segments: a score bonus, a label in the digest, and their own pitch.
+  # A lead joins a segment when it is in one of `states` and matches a
+  # `facility_terms` entry. Company size can't be read from a headline, so
+  # judge "small" yourself in the digest.
+  segments:
+    il_manufacturing:
+      label: Illinois manufacturer (in-house study review)
+      states: [IL]
+      bonus: 10
+      service_line: arc_flash
+      facility_terms:
+        - manufacturer
+        - manufacturers
+        - manufacturing
+        - factory
+        - plant
+        - fabrication
+        - fabricator
+        - machine shop
+        - machining
+        - foundry
+        - stamping
+        - injection molding
+        - plastics
+        - food processing
+        - packaging plant
+        - assembly plant
+        - production line
+        - production facility
+      # Count as direct (strong) arc flash evidence inside the segment only.
+      strong_terms:
+        - electrical hazards
+        - electrical hazard
+        - electrical safety violations
+        - electrical violations
+      # Count as weak evidence inside the segment only: changes that make an
+      # existing study stale.
+      weak_terms:
+        - expansion
+        - expands
+        - new production line
+        - new equipment
+        - new facility
+        - osha
+      template: study_review
+      pitch: >-
+        Offer an independent review of the facility's existing arc flash study,
+        which may have been done in-house: system data and inputs, the IEEE 1584
+        calculation method, protective device settings, and labels, with a short
+        written list of what to fix. A full study or update is the follow-on.
+        Never say or imply that their staff are unqualified or that an in-house
+        study is improper.
 
   # Competence guard: scopes Roben does not sell. Subtracts points rather than
   # excluding, because a design solicitation can still carry a study.
@@ -320,6 +403,10 @@ sources:
       - '"battery energy storage" project approved (California OR Illinois OR Florida)'
       - '"179D" OR "energy efficient commercial building" deduction'
       - '"data center" construction approved (California OR Illinois OR Florida)'
+      # Illinois manufacturing segment
+      - 'OSHA (cited OR citations OR fines) Illinois (manufacturer OR plant OR factory) electrical'
+      - '"arc flash" Illinois (manufacturer OR plant OR factory)'
+      - 'Illinois manufacturer ("plant expansion" OR "new production line" OR "new facility")'
     # Extra RSS/Atom feed URLs (e.g. a local business journal). Optional.
     feeds: []
 
