@@ -351,7 +351,7 @@ def draft_lead(lead: Lead, score: dict[str, Any], cfg: Config, client: Any | Non
 
 def run_drafts(store: Store, cfg: Config, client: Any | None = None, use_llm: bool = True) -> dict[str, int]:
     """Draft qualified leads; give held leads a reason line but no draft."""
-    if use_llm and client is None:
+    if use_llm and client is None and cfg.get("drafting", {}).get("enabled", True):
         client = make_client(cfg)
     if not use_llm:
         client = None
@@ -361,6 +361,16 @@ def run_drafts(store: Store, cfg: Config, client: Any | None = None, use_llm: bo
         score = json.loads(row["score_json"])
         store.set_draft(row["id"], why=template_why(lead_from_row(row), score), draft=None, meta={"method": "held"})
         counts["held"] += 1
+
+    if not cfg.get("drafting", {}).get("enabled", True):
+        # Lead list only: a reason line for each qualified lead, no draft.
+        for row in store.conn.execute(
+            "SELECT * FROM leads WHERE verdict = 'qualified' AND why IS NULL AND digest_date IS NULL"
+        ).fetchall():
+            store.set_draft(row["id"], why=template_why(lead_from_row(row), json.loads(row["score_json"])),
+                            draft=None, meta={"method": "off"})
+        store.commit()
+        return counts
 
     limit = int(cfg.get("drafting", {}).get("max_drafts_per_run", 15))
     for row in store.needing_draft()[:limit]:

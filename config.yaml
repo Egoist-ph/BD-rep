@@ -411,6 +411,9 @@ sources:
     feeds: []
 
 drafting:
+  # Off: the digest is a plain lead list (who, where, why, link). Turn on to
+  # get an outreach draft under each qualified lead.
+  enabled: false
   use_llm: true                 # falls back to templates if no API key
   model: claude-opus-5-5
   effort: medium

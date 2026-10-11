@@ -37,6 +37,7 @@ def sources(cfg, sam_payload, news_xml):
 
 
 def test_full_day(store, cfg, sam_payload, news_xml, tmp_path):
+    cfg.data["drafting"]["enabled"] = True
     reports = ingest(store, cfg, TODAY, sources=sources(cfg, sam_payload, news_xml))
     assert [r.status for r in reports] == ["ok", "ok"]
     news = reports[1].counts
@@ -105,6 +106,7 @@ def test_fetch_window(store, cfg):
 
 
 def test_cli_mark_stats_show(store, cfg, sam_payload, news_xml, tmp_path, capsys):
+    cfg.data["drafting"]["enabled"] = True
     db = store.path
     ingest(store, cfg, TODAY, sources=sources(cfg, sam_payload, news_xml))
     score_all(store, cfg)
@@ -156,3 +158,15 @@ def test_sam_off_by_default_shows_in_digest(store, cfg, news_xml, tmp_path):
     text = write_digest(store, cfg, TODAY, tmp_path).read_text()
     assert "| SAM.gov | off (disabled in config.yaml) |" in text
     assert "| News | ok |" in text
+
+
+def test_default_digest_is_a_lead_list_without_drafts(store, cfg, sam_payload, news_xml, tmp_path):
+    assert cfg.get("drafting")["enabled"] is False
+    ingest(store, cfg, TODAY, sources=sources(cfg, sam_payload, news_xml))
+    score_all(store, cfg)
+    counts = run_drafts(store, cfg)
+    assert counts["drafted"] == 0 and counts["held"] == 2
+    text = write_digest(store, cfg, TODAY, tmp_path).read_text()
+    assert "**5 to review**" in text
+    assert "- **Why it matters:**" in text
+    assert "Subject:" not in text and "```text" not in text

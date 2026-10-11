@@ -92,6 +92,7 @@ def test_llm_payload_carries_segment_pitch_and_incident_terms(cfg):
 
 
 def test_digest_labels_segment_and_incident(store, cfg, tmp_path):
+    cfg.data["drafting"]["enabled"] = True
     for lead in (OSHA, INCIDENT, EXPANSION):
         store.upsert(lead, TODAY)
     score_all(store, cfg)

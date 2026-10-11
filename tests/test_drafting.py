@@ -103,6 +103,7 @@ def _load(store, cfg, payload):
 
 
 def test_run_drafts_with_reviewer_rejection(store, cfg, sam_payload):
+    cfg.data["drafting"]["enabled"] = True
     _load(store, cfg, sam_payload)
     reject = {**GOOD, "is_real_opportunity": False, "reject_reason": "Already awarded with study in scope.",
               "why_it_matters": "", "recipient": "", "subject": "", "body": ""}
@@ -118,6 +119,7 @@ def test_run_drafts_with_reviewer_rejection(store, cfg, sam_payload):
 
 
 def test_run_drafts_without_llm_uses_templates(store, cfg, sam_payload):
+    cfg.data["drafting"]["enabled"] = True
     _load(store, cfg, sam_payload)
     counts = run_drafts(store, cfg, use_llm=False)
     assert counts["drafted"] == 3 and counts["template"] == 3

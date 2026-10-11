@@ -171,8 +171,8 @@ def build_digest(store: Store, cfg: Config, today: dt.date) -> tuple[str, int]:
         out.append(f"Ingested today: {fetched} items → {new} new, {merged} merged across sources")
     out += [
         "",
-        "> Review each draft, edit it, and send it yourself. Then record the outcome so the",
-        "> weekly precision number means something: `python -m bdrep mark <lead#> relevant|not-relevant|sent`",
+        "> Mark each lead so the weekly precision number means something:",
+        "> `python -m bdrep mark <lead#> relevant|not-relevant|sent`",
         "",
     ]
 

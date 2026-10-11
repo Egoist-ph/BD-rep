@@ -112,6 +112,8 @@ Three Google News queries feed it: OSHA electrical citations at Illinois plants,
 
 ## Drafting
 
+**Off by default** (`drafting.enabled: false`): the digest is a lead list with who, where, why it matters, and a link. Set it to `true` to get an outreach draft under each qualified lead, as described below.
+
 When `ANTHROPIC_API_KEY` is set, each qualified lead goes to Claude (`claude-opus-5-5`, effort `medium`, structured JSON output). Claude returns:
 
 - a judgment on whether this is a real, current opportunity. Rejections are listed in the digest under "Filtered by the draft reviewer" so you can catch mistakes.
